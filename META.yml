@@ -1,0 +1,18 @@
+# http://module-build.sourceforge.net/META-spec.html
+#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
+name:         XML-SAX-Cacheable
+version:      1.00
+version_from: lib/XML/SAX/Cacheable.pm
+installdirs:  site
+requires:
+    Cache:                         2.01
+    Storable:                      1
+    Test::More:                    0.47
+    XML::Filter::Recorder:         1
+    XML::Filter::Tee:              0.1
+    XML::SAX:                      0.12
+    XML::SAX::EventMethodMaker:    0.1
+    XML::SAX::Writer:              0.42
+
+distribution_type: module
+generated_by: ExtUtils::MakeMaker version 6.17

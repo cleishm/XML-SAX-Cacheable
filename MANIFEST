@@ -1,0 +1,17 @@
+Changes
+LICENSE
+MANIFEST
+MANIFEST.SKIP
+Makefile.PL
+README
+lib/XML/SAX/Cache/Entry.pm
+lib/XML/SAX/Cache/Tee.pm
+lib/XML/SAX/Cacheable.pm
+t/00basic.t
+t/01make_cacheable.t
+t/02cache_events_pureperl.t
+t/03cache_events_expat.t
+t/04cache_events_libxml.t
+t/05cache_validity_only.t
+t/TestFilter.pm
+META.yml                                 Module meta-data (added by MakeMaker)

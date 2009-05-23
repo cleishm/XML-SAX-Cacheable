@@ -1,0 +1,99 @@
+Readme for XML-SAX-Cacheable
+
+XML::SAX::Cacheable extends the interface for XML::SAX to include methods for
+controlling caching of output.  It's default behaviour is to allow the output
+of the SAX handler to be cached indefinitely.
+
+For more details, see the pod documentation in XML::SAX::Cacheable
+For licensing, see the LICENSE file in this distribution.
+To install:
+
+  perl Makefile.PL
+  make
+  make test
+  sudo make install
+
+Will probably do it.
+
+Please send any bug reports or praise to Chris Leishman <chris@leishman.org>.
+
+Enjoy!
+
+
+----------------------------------------------
+Design Notes.
+
+The SAX caching interface consists of two main compontents, the
+XML::SAX::Cacheable interface and the XML::SAX::Cache::Entry interface.
+
+XML::SAX::Cacheable is designed as an extension to the normal XML::SAX
+interface, providing standard methods to facilitate the enabling of caching
+and the discovery of details relevant to the cached version, such as whether
+the cached version is 'up-to-date' and the presence of dependancies.  The
+intention of this interface is to give the user maximum flexiblity in
+determining if, and deciding when, a SAX filter's output should be cached, or
+the cached version retrieved.
+
+The XML::SAX::Cacheable methods are detailed in the pod documentation (and
+that is the definitive source), however I'll give a quick run down of the
+methods and their rationale.
+
+$x->cacheable()
+ This is used to indicate whether it is possible to cache the output of the
+ filter at all.  If a filters output is entirely dynamic, then it should
+ define this method so that it returns a false value.  This allows the user to
+ avoid calling cache_enable for this filter and for any filters that obtain
+ their input from this filter.
+
+ If a filter returns a false value here (undef) then it shouldn't have to
+ worry about implementing any of the other methods defined by this interface -
+ and the user should ensure they never call them.
+
+$x->cache_key()
+ In some situations it is possible that the output from a filter will not be
+ consistent for every run, but it is not truely dynamic either - instead being
+ from a (small) set of possible inputs that will reoccur with regularity.  For
+ these situations the filter can return a 'key' from this method, which will
+ be used to distinguish which cached version to use.
+
+ Typically when a filter returns a 'key' from this method, it is used to
+ create a variant in the cache for this filter and for any downstream filters.
+ For example, if a caching system like the Cache modules is in use, the user
+ may decide on a set of Cache keys, one for each filter in a pipeline.  Then,
+ after getting a 'key' back from a filter via this method, the user will
+ modify the Cache key for this filter and all downstream filters by postfixing
+ this 'key', thus creating variant versions.  Obviously this should be used
+ with caution and each module that implements this should probably make some
+ high level API available to allow the user to limit or disable this
+ functionality.
+
+$x->cache_immutable($cache_entry)
+ Sometimes it is desirable to know if the output of the filter depended on
+ anything other than the input, and this method can be used to determine that.
+ Obviously it entirely up to the filter author how they determine this
+ information.
+ 
+ For example, given two filters in a pipeline and the first filter has
+ dependancies and the second does not - it would make sense to only cache the
+ output of the second filter and not bother caching the output of the first
+ (instead only caching the validity object).
+
+ Some filters will require some magic in implementing this method, which is
+ discussed in the pod documentation.
+
+$x->cache_check($cache_entry)
+ Returns a boolean value indicating whether the cache is up-to-date.  How the
+ filter wishes to determine this is entirely arbitrary - but it will usually
+ retrieve the validity object and use that in some way.  For example, a filter
+ might store a list of all file dependancies and their last modified
+ timestamps in the validity object.  Then, when this method is invoked, it
+ would retrieve the validity object and compare all the last modified
+ timestamps to determine if it should regenerate it's output.
+
+$x->cache_enable($cache_entry, [ $validity_only ])
+ To enable caching of a filters output, this method is invoked.  The filter
+ itself is responsible for setting everything up so that the output will be
+ properly cached - AND so that any changes can be reverted by calling
+ cache_disable.  The default implementation of this method takes care of
+ everything, but some filters can possibly be more optimal in the way they
+ handle this.
